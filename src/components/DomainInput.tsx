@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { Globe, Search, BookOpen } from "lucide-react";
+import { Globe, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface DomainInputProps {
   onTestWebsite: (domain: string) => void;
-  onShowTerms: () => void;
   isLoading: boolean;
 }
 
-const DomainInput = ({ onTestWebsite, onShowTerms, isLoading }: DomainInputProps) => {
+const DomainInput = ({ onTestWebsite, isLoading }: DomainInputProps) => {
   const [domain, setDomain] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,26 +39,14 @@ const DomainInput = ({ onTestWebsite, onShowTerms, isLoading }: DomainInputProps
           />
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            type="submit"
-            disabled={!domain.trim() || isLoading}
-            className="flex-1 h-11"
-          >
-            <Search className="h-4 w-4 mr-2" />
-            {isLoading ? "Testing..." : "Test Website"}
-          </Button>
-          
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onShowTerms}
-            className="flex-1 h-11"
-          >
-            <BookOpen className="h-4 w-4 mr-2" />
-            Cybersecurity Terms
-          </Button>
-        </div>
+        <Button
+          type="submit"
+          disabled={!domain.trim() || isLoading}
+          className="w-full h-11"
+        >
+          <Search className="h-4 w-4 mr-2" />
+          {isLoading ? "Testing..." : "Test Website"}
+        </Button>
       </form>
       
       <p className="mt-4 text-xs text-muted-foreground text-center">

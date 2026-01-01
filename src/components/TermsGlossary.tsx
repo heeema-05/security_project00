@@ -1,14 +1,9 @@
 import { useState } from "react";
-import { ArrowLeft, Search, BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { securityTerms, categories, type SecurityTerm } from "@/data/securityTerms";
-
-interface TermsGlossaryProps {
-  onBack: () => void;
-}
 
 const categoryColors: Record<string, string> = {
   'Governance': 'bg-chart-1/10 text-chart-1 border-chart-1/30',
@@ -18,7 +13,7 @@ const categoryColors: Record<string, string> = {
   'Risk Management': 'bg-primary/10 text-primary border-primary/30',
 };
 
-const TermsGlossary = ({ onBack }: TermsGlossaryProps) => {
+const TermsGlossary = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -38,16 +33,11 @@ const TermsGlossary = ({ onBack }: TermsGlossaryProps) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">
-            Cybersecurity Terms
-          </h2>
-        </div>
+      <div className="flex items-center gap-2">
+        <BookOpen className="h-6 w-6 text-primary" />
+        <h2 className="text-2xl font-bold text-foreground">
+          Cybersecurity Terms
+        </h2>
       </div>
 
       {/* Search and Filters */}
@@ -66,30 +56,32 @@ const TermsGlossary = ({ onBack }: TermsGlossaryProps) => {
             </div>
             
             <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={selectedCategory === null ? "default" : "outline"}
-                className={`cursor-pointer transition-colors ${
-                  selectedCategory === null ? 'bg-primary' : 'hover:bg-muted'
-                }`}
+              <button
+                type="button"
                 onClick={() => setSelectedCategory(null)}
+                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors cursor-pointer ${
+                  selectedCategory === null 
+                    ? 'bg-primary text-primary-foreground border-transparent' 
+                    : 'border-border hover:bg-muted'
+                }`}
               >
                 All ({securityTerms.length})
-              </Badge>
+              </button>
               {categories.map((category) => (
-                <Badge
+                <button
                   key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  className={`cursor-pointer transition-colors ${
-                    selectedCategory === category 
-                      ? 'bg-primary' 
-                      : 'hover:bg-muted'
-                  }`}
+                  type="button"
                   onClick={() => setSelectedCategory(
                     selectedCategory === category ? null : category
                   )}
+                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors cursor-pointer ${
+                    selectedCategory === category 
+                      ? 'bg-primary text-primary-foreground border-transparent' 
+                      : 'border-border hover:bg-muted'
+                  }`}
                 >
                   {category} ({securityTerms.filter((t: SecurityTerm) => t.category === category).length})
-                </Badge>
+                </button>
               ))}
             </div>
           </div>
