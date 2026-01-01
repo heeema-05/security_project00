@@ -14,28 +14,32 @@
  * - React functional components with TypeScript
  * - Modular component structure for maintainability
  * - Separation of concerns: data, utils, and presentation
+ * - Left sidebar navigation with main content area
+ * 
+ * STANDARDS ALIGNMENT:
+ * - ISO/IEC 27001 (Information Security Management)
+ * - NIST Cybersecurity Framework (Identify, Protect, Detect)
+ * - OWASP Top 10 (Web Security Awareness)
  */
 
 import { useState, useCallback } from "react";
-import Header from "@/components/Header";
-import DomainInput from "@/components/DomainInput";
-import SecurityReport from "@/components/SecurityReport";
+import AppSidebar, { type ViewType } from "@/components/AppSidebar";
+import WebsiteTestView from "@/components/WebsiteTestView";
+import SecurityReportSummary from "@/components/SecurityReportSummary";
 import TermsGlossary from "@/components/TermsGlossary";
-import Disclaimer from "@/components/Disclaimer";
-import LoadingState from "@/components/LoadingState";
+import ExportView from "@/components/ExportView";
 import { 
   performSecurityAssessment, 
   isValidDomain, 
-  type SecurityReport as SecurityReportType 
+  type SecurityReport 
 } from "@/utils/securityAssessment";
 import { useToast } from "@/hooks/use-toast";
 
-type ViewState = 'main' | 'terms';
-
 const Index = () => {
-  const [view, setView] = useState<ViewState>('main');
+  const [currentView, setCurrentView] = useState<ViewType>('test');
   const [isLoading, setIsLoading] = useState(false);
-  const [report, setReport] = useState<SecurityReportType | null>(null);
+  const [report, setReport] = useState<SecurityReport | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { toast } = useToast();
 
   const handleTestWebsite = useCallback(async (domain: string) => {
@@ -74,63 +78,67 @@ const Index = () => {
     }
   }, [toast]);
 
-  const handleShowTerms = useCallback(() => {
-    setView('terms');
+  const handleViewChange = useCallback((view: ViewType) => {
+    setCurrentView(view);
   }, []);
 
-  const handleBackToMain = useCallback(() => {
-    setView('main');
+  const handleToggleSidebar = useCallback(() => {
+    setIsSidebarCollapsed(prev => !prev);
   }, []);
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'test':
+        return (
+          <WebsiteTestView
+            onTestWebsite={handleTestWebsite}
+            isLoading={isLoading}
+            report={report}
+          />
+        );
+      case 'report':
+        return report ? <SecurityReportSummary report={report} /> : null;
+      case 'terms':
+        return <TermsGlossary />;
+      case 'export':
+        return report ? <ExportView report={report} /> : null;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-background flex w-full">
+      {/* Left Sidebar */}
+      <AppSidebar
+        currentView={currentView}
+        onViewChange={handleViewChange}
+        hasReport={!!report}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleSidebar}
+      />
       
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {view === 'terms' ? (
-          <TermsGlossary onBack={handleBackToMain} />
-        ) : (
-          <div className="space-y-6">
-            {/* Domain Input Section */}
-            <DomainInput
-              onTestWebsite={handleTestWebsite}
-              onShowTerms={handleShowTerms}
-              isLoading={isLoading}
-            />
-
-            {/* Disclaimer */}
-            <Disclaimer />
-
-            {/* Loading State */}
-            {isLoading && <LoadingState />}
-
-            {/* Security Report */}
-            {!isLoading && report && <SecurityReport report={report} />}
-
-            {/* Empty State */}
-            {!isLoading && !report && (
-              <div className="text-center py-12 text-muted-foreground">
-                <p className="text-lg mb-2">Enter a domain to begin security assessment</p>
-                <p className="text-sm">
-                  Example domains: google.com, github.com, example.org
-                </p>
-              </div>
-            )}
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+          <div className="max-w-4xl mx-auto">
+            {renderContent()}
           </div>
-        )}
-      </main>
+        </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-12">
-        <div className="container mx-auto px-4 py-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            University Course Project — Information Security Management
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Semester 1st / 2025–2026
-          </p>
-        </div>
-      </footer>
+        {/* Footer */}
+        <footer className="border-t border-border bg-card/50">
+          <div className="px-6 py-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              University Course Project — Information Security Management
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Semester 1st / 2025–2026
+            </p>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 };
